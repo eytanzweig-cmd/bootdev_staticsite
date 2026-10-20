@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class TextType(Enum):
-    TXT_PLAIN = "plain"
-    TXT_BOLD = "bold text"
-    TXT_ITALIC = "italic text"
-    TXT_CODE = "code text"
+    PLAIN = "plain"
+    BOLD = "bold text"
+    ITALIC = "italic text"
+    CODE = "code text"
     LINK = "link"
     IMG = "image"
 
@@ -16,7 +16,9 @@ class TextNode:
         self.url = url
 
 
-    def __eq__(self, other: "TextNode"):  # pyright: ignore[reportIncompatibleMethodOverride]
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, TextNode):
+            return False
         return self.text == other.text and self.text_type == other.text_type and self.url == other.url
 
     def __repr__(self) -> str:

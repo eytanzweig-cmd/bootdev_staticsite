@@ -1,7 +1,7 @@
 from textnode import TextNode, TextType
 
 def main():
-    a = TextNode("test text", TextType.TXT_BOLD, "http://")
+    a = TextNode("test text", TextType.BOLD, "http://text.html")
     print (a)
 
 if __name__ == "__main__":
