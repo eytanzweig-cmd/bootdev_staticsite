@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TextType(Enum):
     TXT_PLAIN = "plain"
     TXT_BOLD = "bold text"
@@ -15,7 +16,7 @@ class TextNode:
         self.url = url
 
 
-    def __eq__(self, other: "TextNode"):
+    def __eq__(self, other: "TextNode"):  # pyright: ignore[reportIncompatibleMethodOverride]
         return self.text == other.text and self.text_type == other.text_type and self.url == other.url
 
     def __repr__(self) -> str:
