@@ -1,7 +1,6 @@
-import re
 from enum import Enum
 
-from htmlnode import LeafNode, ParentNode
+from htmlnode import ParentNode
 from textnode import TextNode, TextType, text_node_to_html_node, text_to_textnodes
 
 
@@ -26,21 +25,8 @@ def markdown_to_blocks(markdown: str) -> list[str]:
 
 def block_to_block_type(markdown: str) -> BlockType:
     is_header = True
-    if markdown[0] == "#":
-        for i in range(1,6):
-            if markdown[i] == "#":
-                continue
-            elif markdown[i] == " ":
-                i -= 1
-                is_header = True
-                break
-            else:
-                is_header = False
-                break
-        if markdown[i+1] != " ":
-            is_header = False
-        if is_header:
-            return BlockType.HEADING
+    if markdown.startswith(("# ", "## ", "### ", "#### ", "##### ","###### ")):
+        return BlockType.HEADING
     if markdown.startswith("```\n") and markdown.endswith("```"):
         return BlockType.CODE
     split_lines = markdown.split("\n")
@@ -67,7 +53,7 @@ def strip_newlines_and_prefix(block:str, prefix:str | None = None) -> list[str]:
                 split_lines[i] = split_lines[i][len(prefix):len(split_lines[i])]
     if prefix == "1":
         for i in range(len(split_lines)):
-            n_prefix = f"{i+1}."
+            n_prefix = f"{i+1}. "
             if split_lines[i].startswith(n_prefix):
                 split_lines[i] = split_lines[i][len(n_prefix):len(split_lines[i])]
 
@@ -87,7 +73,7 @@ def ordered_list_block_to_html_node(block):
     return this_block
 
 def unordered_list_block_to_html_node(block):
-    lines = strip_newlines_and_prefix(block,"-")
+    lines = strip_newlines_and_prefix(block,"- ")
     leafs = []
     for line in lines:
         inline_nodes = text_to_textnodes(line)
@@ -99,7 +85,7 @@ def unordered_list_block_to_html_node(block):
     return this_block
 
 def quote_block_to_html_node(block):
-    block = " ".join(strip_newlines_and_prefix(block,">"))
+    block = " ".join(strip_newlines_and_prefix(block,"> "))
     leafs = []
     inline_nodes = text_to_textnodes(block)
     for node in inline_nodes:
@@ -166,4 +152,17 @@ def markdown_to_html_node(markdown):
             case _:
                 raise ValueError("Unknown Blocktype")
     output = ParentNode("div", html_blocks)
+    return output
+
+def extract_title(markdown) -> str:
+    output = ""
+    found_title = False
+    md_blocks = markdown.strip().split("\n")
+    for block in md_blocks:
+        if block.startswith("# "):
+            found_title = True
+            output = block[2:len(block)].strip()
+            break
+    if not found_title:
+        raise Exception("No title found!")
     return output

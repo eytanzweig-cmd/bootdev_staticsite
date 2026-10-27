@@ -1,9 +1,13 @@
 import unittest
 
-from markdown_blocks import block_to_block_type, markdown_to_blocks, markdown_to_html_node
+from markdown_blocks import block_to_block_type, markdown_to_blocks, markdown_to_html_node, extract_title
 
 
 class TestBlock(unittest.TestCase):
+    def test_extrat_title(self):
+        print(extract_title("# title test"))
+        print(extract_title("## not the title\n#     the actual title"))
+
     def test_markdown_to_blocks(self):
         md = """
 ### Header
