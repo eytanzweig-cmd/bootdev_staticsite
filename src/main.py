@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from markdown_blocks import extract_title, markdown_to_html_node
 
@@ -25,7 +26,7 @@ def transfer_files(from_dir: str, to_dir: str):
     os.mkdir(to_dir)
     transfer_dir(from_dir, to_dir)
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath = "/"):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     with open(from_path, encoding="utf-8") as f:
         markdown_contents = f.read()
@@ -35,6 +36,8 @@ def generate_page(from_path, template_path, dest_path):
     page_title = extract_title(markdown_contents)
     page_content = page_content.replace("{{ Title }}",page_title)
     page_content = page_content.replace("{{ Content }}",html_contents)
+    page_content = page_content.replace('href="/',f'href="{basepath}')
+    page_content = page_content.replace('src="/',f'src="{basepath}')
 
     if not os.path.exists(os.path.dirname(dest_path)):
         os.mkdir(os.path.dirname(dest_path))
@@ -42,7 +45,7 @@ def generate_page(from_path, template_path, dest_path):
     with open(dest_path, "w", encoding="utf-8") as f:
         f.write(page_content)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath = "/"):
     contents = os.listdir(dir_path_content)
     for file in contents:
         from_file = os.path.join(dir_path_content, file)
@@ -50,18 +53,22 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             filename = file.split(".")
             if filename[1]=="md":
                 dest_filename = dest_dir_path+"/"+filename[0]+".html"
-                generate_page(from_file,template_path,dest_filename)
+                generate_page(from_file,template_path,dest_filename,basepath)
         else:
             to_dest = os.path.join(dest_dir_path, file)
             if not os.path.exists(to_dest):
                 os.mkdir(to_dest)
 
-            generate_pages_recursive(from_file,template_path,to_dest)
+            generate_pages_recursive(from_file,template_path,to_dest,basepath)
 
 
 def main():
-    transfer_files("static","public")
-    generate_pages_recursive("content","template.html","public")
+    if len(sys.argv) == 1:
+        basepath = "/"
+    else:
+        basepath = sys.argv[1]
+    transfer_files("static","docs")
+    generate_pages_recursive("content","template.html","docs", basepath)
 
 if __name__ == "__main__":
     main()
